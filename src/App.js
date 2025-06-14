@@ -187,7 +187,7 @@ const App = () => {
       </div>
 
       <div className="mt-10 text-center">
-        <p className="mb-2 text-sm text-gray-300">📱 Scan this QR to open on MetaMask Mobile</p>
+        <p className="mb-2 text-sm text-gray-300">📱📱 Scan this QR to open on MetaMask Mobile</p>
         <div className="inline-block p-2 bg-white rounded">
           <QRCodeCanvas value="https://nixeltoken.github.io/nix-presale/" size={160} />
         </div>
