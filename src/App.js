@@ -5,6 +5,10 @@ import Web3Modal from "web3modal";
 
 const CONTRACT_ADDRESS = "0xC89334a5aa130C6E9162cF45Db33168d078eFE80";
 
+const isMobileDevice = () => {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+};
+
 const App = () => {
   const [walletAddress, setWalletAddress] = useState(null);
   const [bnbAmount, setBnbAmount] = useState("");
@@ -48,6 +52,11 @@ const App = () => {
   };
 
   const connectWallet = async () => {
+    if (isMobileDevice()) {
+      window.location.href = "https://metamask.app.link/dapp/nixeltoken.github.io/nix-presale/";
+      return;
+    }
+
     try {
       const web3Modal = new Web3Modal({
         cacheProvider: false,
@@ -187,7 +196,7 @@ const App = () => {
       </div>
 
       <div className="mt-10 text-center">
-        <p className="mb-2 text-sm text-gray-300">📱📱 Scan this QR to open on MetaMask Mobile</p>
+        <p className="mb-2 text-sm text-gray-300">📱 Scan this QR to open on MetaMask Mobile</p>
         <div className="inline-block p-2 bg-white rounded">
           <QRCodeCanvas value="https://nixeltoken.github.io/nix-presale/" size={160} />
         </div>
