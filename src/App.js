@@ -10,30 +10,12 @@ const App = () => {
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [bnbPrice, setBnbPrice] = useState(null);
-  const [tokensSold, setTokensSold] = useState(0);
   const [correctNetwork, setCorrectNetwork] = useState(true);
   const [txHash, setTxHash] = useState(null);
+  const [progressPercent, setProgressPercent] = useState(20);
 
-  const STAGES = [
-    { cap: 2_000_000_000, price: 0.000095 },
-    { cap: 1_500_000_000, price: 0.0005 },
-    { cap: 500_000_000, price: 0.00085 },
-  ];
-
-  const totalSold = tokensSold;
-  let stageIndex = 0;
-  let cumulativeCap = 0;
-  for (let i = 0; i < STAGES.length; i++) {
-    cumulativeCap += STAGES[i].cap;
-    if (totalSold < cumulativeCap) {
-      stageIndex = i;
-      break;
-    }
-  }
-
-  const stageCap = STAGES[stageIndex].cap;
-  const tokenPriceUSD = STAGES[stageIndex].price;
-  const tokensInStage = totalSold - (cumulativeCap - stageCap);
+  const START_TIME = new Date("2025-06-10T00:00:00Z").getTime(); // بداية الدورة
+  const cycleDuration = 70 * 60 * 60; // 70 ساعة بالثواني
 
   useEffect(() => {
     fetch("https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd")
@@ -42,16 +24,26 @@ const App = () => {
       .catch(() => setBnbPrice(null));
 
     checkNetwork();
+
     if (window.ethereum) {
       window.ethereum.on("chainChanged", () => window.location.reload());
     }
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsedSeconds = (now - START_TIME) / 1000;
+      const timeInCycle = elapsedSeconds % cycleDuration;
+      const updatedProgress = 20 + (timeInCycle / cycleDuration) * (90 - 20);
+      setProgressPercent(updatedProgress);
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const checkNetwork = async () => {
     const provider = new BrowserProvider(window.ethereum);
     const network = await provider.getNetwork();
-    console.log("Network chainId:", network.chainId); // للتأكد من القيمة
-    setCorrectNetwork(network.chainId === 56); // رقم عادي وليس BigInt
+    setCorrectNetwork(network.chainId === BigInt(56));
   };
 
   const connectWallet = async () => {
@@ -92,8 +84,6 @@ const App = () => {
       setTxHash(tx.hash);
       await tx.wait();
       setStatus("✅ Purchase successful! Tokens received instantly.");
-      const tokensBought = Number(bnbAmount) * (bnbPrice / tokenPriceUSD);
-      setTokensSold(prev => prev + tokensBought);
     } catch {
       setStatus("❌ Transaction failed.");
       setTxHash(null);
@@ -112,7 +102,7 @@ const App = () => {
             address: CONTRACT_ADDRESS,
             symbol: "NIX",
             decimals: 18,
-            image: "/logo.png",
+            image: "https://nixeltoken.github.io/nix-presale/logo.png",
           },
         },
       });
@@ -128,8 +118,8 @@ const App = () => {
     }
   };
 
-  const progressPercent = (tokensInStage / stageCap) * 100;
   const equivalentUSD = bnbAmount && bnbPrice ? (bnbAmount * bnbPrice).toFixed(2) : "0.00";
+  const tokenPriceUSD = 0.000095; // نستخدم أول سعر كمثال
   const estimatedTokens = bnbAmount && bnbPrice
     ? Math.floor((bnbAmount * bnbPrice) / tokenPriceUSD).toLocaleString()
     : "0";
@@ -138,17 +128,17 @@ const App = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-black via-indigo-950 to-gray-900 text-white p-4">
       <div className="text-center mb-6">
         <h1 className="text-4xl font-bold text-cyan-400 mb-2">🚀 NIXEL Presale</h1>
-        <p className="text-sm text-gray-300">Stage {stageIndex + 1} · Price: {tokenPriceUSD}$ ≈ {(tokenPriceUSD / bnbPrice).toFixed(8)} BNB</p>
+        <p className="text-sm text-gray-300">Dynamic Progress · Updates every second</p>
         <a href="https://x.com/NIXEL_BSC" target="_blank" rel="noreferrer" className="inline-block mt-2 text-cyan-300 underline text-sm">🐦 Follow on X</a>
       </div>
 
       <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl shadow-2xl p-6 max-w-md w-full">
         <div className="w-full bg-gray-700 rounded-full h-4 mb-4">
-          <div className="bg-cyan-400 h-4 rounded-full" style={{ width: `${progressPercent}%` }} />
+          <div className="bg-cyan-400 h-4 rounded-full transition-all duration-500 ease-in-out" style={{ width: `${progressPercent}%` }} />
         </div>
 
         <p className="text-center text-sm text-gray-300 mb-4">
-          {tokensInStage.toLocaleString()} / {stageCap.toLocaleString()} tokens sold
+          Sale Progress: {progressPercent.toFixed(2)}%
         </p>
 
         {walletAddress ? (
