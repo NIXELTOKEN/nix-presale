@@ -50,7 +50,8 @@ const App = () => {
   const checkNetwork = async () => {
     const provider = new BrowserProvider(window.ethereum);
     const network = await provider.getNetwork();
-    setCorrectNetwork(network.chainId === 56); // ✅ بدون BigInt
+    console.log("Network chainId:", network.chainId); // للتأكد من القيمة
+    setCorrectNetwork(network.chainId === 56); // رقم عادي وليس BigInt
   };
 
   const connectWallet = async () => {
