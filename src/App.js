@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { BrowserProvider, parseEther } from "ethers";
 import { QRCodeCanvas } from "qrcode.react";
 import Web3Modal from "web3modal";
-import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
 
 const CONTRACT_ADDRESS = "0xC89334a5aa130C6E9162cF45Db33168d078eFE80";
 
@@ -131,36 +129,16 @@ const App = () => {
     : "0";
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-black via-indigo-950 to-gray-900 text-white p-4">
-      <Particles
-        id="tsparticles"
-        init={loadFull}
-        options={{
-          fullScreen: { enable: true, zIndex: -1 },
-          background: { color: { value: "#000000" } },
-          particles: {
-            number: { value: 66 },
-            color: { value: "#00ffff" },
-            shape: { type: "circle" },
-            opacity: { value: 0.2, random: true },
-            size: { value: 3, random: true },
-            move: {
-              enable: true,
-              speed: 0.6,
-              direction: "none",
-              outModes: "bounce",
-            },
-          },
-        }}
-      />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-black via-indigo-950 to-gray-900 text-white p-4 relative overflow-hidden">
+      <div className="absolute inset-0 z-0 animate-pulse bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-cyan-500/10 via-purple-500/5 to-transparent" />
 
-      <div className="text-center mb-6">
+      <div className="z-10 text-center mb-6">
         <h1 className="text-4xl font-bold text-cyan-400 mb-2">🚀 NIXEL Presale</h1>
         <p className="text-sm text-gray-300">Dynamic Progress · Updates every second</p>
         <a href="https://x.com/NIXEL_BSC" target="_blank" rel="noreferrer" className="inline-block mt-2 text-cyan-300 underline text-sm">🐦 Follow on X</a>
       </div>
 
-      <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl shadow-2xl p-6 max-w-md w-full">
+      <div className="z-10 bg-white bg-opacity-10 backdrop-blur-md rounded-xl shadow-2xl p-6 max-w-md w-full">
         <div className="w-full bg-gray-700 rounded-full h-4 mb-4">
           <div className="bg-cyan-400 h-4 rounded-full transition-all duration-500 ease-in-out" style={{ width: `${progressPercent}%` }} />
         </div>
@@ -173,12 +151,7 @@ const App = () => {
           <p className="text-center text-sm text-green-400 mb-2">👜 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
         ) : (
           <>
-            <button
-              onClick={connectWallet}
-              className="w-full py-2 mb-2 bg-blue-600 rounded-md animate-pulse hover:animate-none transition duration-300 shadow-lg hover:shadow-cyan-400/50"
-            >
-              ✨🔗 Connect Wallet
-            </button>
+            <button onClick={connectWallet} className="w-full py-2 mb-2 bg-blue-600 rounded-md">🔗 Connect Wallet</button>
             <a href="https://metamask.app.link/dapp/nixeltoken.github.io/nix-presale/" target="_blank" rel="noreferrer" className="block text-center text-cyan-300 text-sm underline mb-3">📱 Open in MetaMask App</a>
           </>
         )}
@@ -215,14 +188,14 @@ const App = () => {
         <p className="mt-3 text-xs text-center text-gray-500">Tokens will be sent instantly to your wallet upon purchase.</p>
       </div>
 
-      <div className="mt-10 text-center">
+      <div className="z-10 mt-10 text-center">
         <p className="mb-2 text-sm text-gray-300">📱 Scan this QR to open on MetaMask Mobile</p>
         <div className="inline-block p-2 bg-white rounded">
           <QRCodeCanvas value="https://nixeltoken.github.io/nix-presale/" size={160} />
         </div>
       </div>
 
-      <footer className="mt-10 text-sm text-gray-500">© 2025 NIXEL. All rights reserved.</footer>
+      <footer className="z-10 mt-10 text-sm text-gray-500">© 2025 NIXEL. All rights reserved.</footer>
     </div>
   );
 };
