@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/nix-presale/static/css/main.0c98ffe3.css",
-    "main.js": "/nix-presale/static/js/main.68ef4edc.js",
+    "main.css": "/nix-presale/static/css/main.271babfd.css",
+    "main.js": "/nix-presale/static/js/main.8e212546.js",
     "index.html": "/nix-presale/index.html",
-    "main.0c98ffe3.css.map": "/nix-presale/static/css/main.0c98ffe3.css.map",
-    "main.68ef4edc.js.map": "/nix-presale/static/js/main.68ef4edc.js.map"
+    "main.271babfd.css.map": "/nix-presale/static/css/main.271babfd.css.map",
+    "main.8e212546.js.map": "/nix-presale/static/js/main.8e212546.js.map"
   },
   "entrypoints": [
-    "static/css/main.0c98ffe3.css",
-    "static/js/main.68ef4edc.js"
+    "static/css/main.271babfd.css",
+    "static/js/main.8e212546.js"
   ]
 }
