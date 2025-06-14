@@ -127,7 +127,7 @@ const App = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-black via-indigo-950 to-gray-900 text-white p-4">
       <div className="text-center mb-6">
-        <h1 className="text-4xl font-bold text-cyan-400 mb-2">🚀 NIXEL Presale</h1>
+        <h1 className="text-4xl font-bold text-cyan-400 mb-2">🚀🚀 NIXEL Presale</h1>
         <p className="text-sm text-gray-300">Dynamic Progress · Updates every second</p>
         <a href="https://x.com/NIXEL_BSC" target="_blank" rel="noreferrer" className="inline-block mt-2 text-cyan-300 underline text-sm">🐦 Follow on X</a>
       </div>
