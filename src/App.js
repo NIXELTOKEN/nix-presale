@@ -13,7 +13,7 @@ const App = () => {
   const [bnbPrice, setBnbPrice] = useState(null);
   const [correctNetwork, setCorrectNetwork] = useState(true);
   const [txHash, setTxHash] = useState(null);
-  const [progressPercent, setProgressPercent] = useState(20);
+  const [progressPercent, setProgressPercent] = useState(() => 20);
 
   const START_TIME = new Date("2025-06-10T00:00:00Z").getTime();
   const cycleDuration = 70 * 60 * 60;
