@@ -53,6 +53,7 @@ const App = () => {
         cacheProvider: false,
         providerOptions: {},
       });
+
       const instance = await web3Modal.connect();
       const provider = new BrowserProvider(instance);
       const signer = await provider.getSigner();
