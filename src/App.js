@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { BrowserProvider, parseEther } from "ethers";
 import { QRCodeCanvas } from "qrcode.react";
 import Web3Modal from "web3modal";
+import Particles from "react-tsparticles";
+import { loadFull } from "tsparticles";
 
 const CONTRACT_ADDRESS = "0xC89334a5aa130C6E9162cF45Db33168d078eFE80";
 
@@ -14,7 +16,6 @@ const App = () => {
   const [correctNetwork, setCorrectNetwork] = useState(true);
   const [txHash, setTxHash] = useState(null);
   const [progressPercent, setProgressPercent] = useState(20);
-  const [showWalletOptions, setShowWalletOptions] = useState(false);
 
   const START_TIME = new Date("2025-06-10T00:00:00Z").getTime();
   const cycleDuration = 70 * 60 * 60;
@@ -49,13 +50,6 @@ const App = () => {
   };
 
   const connectWallet = async () => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    if (isMobile && !window.ethereum) {
-      setShowWalletOptions(true);
-      return;
-    }
-
     try {
       const web3Modal = new Web3Modal({
         cacheProvider: false,
@@ -138,6 +132,28 @@ const App = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-black via-indigo-950 to-gray-900 text-white p-4">
+      <Particles
+        id="tsparticles"
+        init={loadFull}
+        options={{
+          fullScreen: { enable: true, zIndex: -1 },
+          background: { color: { value: "#000000" } },
+          particles: {
+            number: { value: 66 },
+            color: { value: "#00ffff" },
+            shape: { type: "circle" },
+            opacity: { value: 0.2, random: true },
+            size: { value: 3, random: true },
+            move: {
+              enable: true,
+              speed: 0.6,
+              direction: "none",
+              outModes: "bounce",
+            },
+          },
+        }}
+      />
+
       <div className="text-center mb-6">
         <h1 className="text-4xl font-bold text-cyan-400 mb-2">🚀 NIXEL Presale</h1>
         <p className="text-sm text-gray-300">Dynamic Progress · Updates every second</p>
@@ -157,7 +173,12 @@ const App = () => {
           <p className="text-center text-sm text-green-400 mb-2">👜 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
         ) : (
           <>
-            <button onClick={connectWallet} className="w-full py-2 mb-2 bg-blue-600 rounded-md">🔗 Connect Wallet</button>
+            <button
+              onClick={connectWallet}
+              className="w-full py-2 mb-2 bg-blue-600 rounded-md animate-pulse hover:animate-none transition duration-300 shadow-lg hover:shadow-cyan-400/50"
+            >
+              ✨🔗 Connect Wallet
+            </button>
             <a href="https://metamask.app.link/dapp/nixeltoken.github.io/nix-presale/" target="_blank" rel="noreferrer" className="block text-center text-cyan-300 text-sm underline mb-3">📱 Open in MetaMask App</a>
           </>
         )}
@@ -193,49 +214,6 @@ const App = () => {
 
         <p className="mt-3 text-xs text-center text-gray-500">Tokens will be sent instantly to your wallet upon purchase.</p>
       </div>
-
-      {showWalletOptions && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <div className="bg-white text-black rounded-xl p-6 max-w-sm w-full text-center">
-            <h2 className="text-xl font-bold mb-4">📱 Open in Wallet</h2>
-            <p className="text-sm text-gray-700 mb-4">Choose your wallet to open this site inside it:</p>
-
-            <a
-              href="https://metamask.app.link/dapp/nixeltoken.github.io/nix-presale/"
-              target="_blank"
-              rel="noreferrer"
-              className="block w-full py-2 mb-2 bg-orange-500 text-white rounded-md"
-            >
-              🦊 MetaMask
-            </a>
-
-            <a
-              href="https://link.trustwallet.com/open_url?coin_id=20000714&url=https://nixeltoken.github.io/nix-presale/"
-              target="_blank"
-              rel="noreferrer"
-              className="block w-full py-2 mb-2 bg-blue-600 text-white rounded-md"
-            >
-              🔐 Trust Wallet
-            </a>
-
-            <a
-              href="rabby://app?url=https://nixeltoken.github.io/nix-presale/"
-              target="_blank"
-              rel="noreferrer"
-              className="block w-full py-2 mb-4 bg-purple-600 text-white rounded-md"
-            >
-              🐰 Rabby Wallet
-            </a>
-
-            <button
-              onClick={() => setShowWalletOptions(false)}
-              className="text-sm text-gray-500 underline"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="mt-10 text-center">
         <p className="mb-2 text-sm text-gray-300">📱 Scan this QR to open on MetaMask Mobile</p>
