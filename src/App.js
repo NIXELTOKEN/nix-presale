@@ -2,12 +2,9 @@ import React, { useState, useEffect } from "react";
 import { BrowserProvider, parseEther } from "ethers";
 import { QRCodeCanvas } from "qrcode.react";
 import Web3Modal from "web3modal";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 
 const CONTRACT_ADDRESS = "0xC89334a5aa130C6E9162cF45Db33168d078eFE80";
-
-const isMobileDevice = () => {
-  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-};
 
 const App = () => {
   const [walletAddress, setWalletAddress] = useState(null);
@@ -52,15 +49,21 @@ const App = () => {
   };
 
   const connectWallet = async () => {
-    if (isMobileDevice()) {
-      window.location.href = "https://metamask.app.link/dapp/nixeltoken.github.io/nix-presale/";
-      return;
-    }
-
     try {
+      const providerOptions = {
+        walletconnect: {
+          package: WalletConnectProvider,
+          options: {
+            rpc: {
+              56: "https://bsc-dataseed.binance.org",
+            },
+          },
+        },
+      };
+
       const web3Modal = new Web3Modal({
         cacheProvider: false,
-        providerOptions: {},
+        providerOptions,
       });
 
       const instance = await web3Modal.connect();
