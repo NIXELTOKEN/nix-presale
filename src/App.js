@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { BrowserProvider, parseEther } from "ethers";
+import { ethers, BrowserProvider, parseEther } from "ethers";
+import { QRCodeCanvas } from "qrcode.react";
+import NIXEL_ABI from "./NIXEL_ABI.json";
 
 const CONTRACT_ADDRESS = "0xC89334a5aa130C6E9162cF45Db33168d078eFE80";
+const TOTAL_SUPPLY = 5_000_000_000;
 
 const App = () => {
   const [walletAddress, setWalletAddress] = useState(null);
@@ -41,15 +44,33 @@ const App = () => {
       .catch(() => setBnbPrice(null));
 
     checkNetwork();
+
     if (window.ethereum) {
       window.ethereum.on("chainChanged", () => window.location.reload());
     }
+
+    fetchTokensSold();
+    const interval = setInterval(fetchTokensSold, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const checkNetwork = async () => {
     const provider = new BrowserProvider(window.ethereum);
     const network = await provider.getNetwork();
     setCorrectNetwork(network.chainId === BigInt(56));
+  };
+
+  const fetchTokensSold = async () => {
+    try {
+      const provider = new ethers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, NIXEL_ABI, provider);
+      const balance = await contract.balanceOf(CONTRACT_ADDRESS);
+      const remaining = Number(ethers.formatUnits(balance, 18));
+      const sold = TOTAL_SUPPLY - remaining;
+      setTokensSold(sold);
+    } catch (err) {
+      console.error("❌ Failed to fetch sold tokens:", err);
+    }
   };
 
   const connectWallet = async () => {
@@ -90,13 +111,38 @@ const App = () => {
       setTxHash(tx.hash);
       await tx.wait();
       setStatus("✅ Purchase successful! Tokens received instantly.");
-      const tokensBought = Number(bnbAmount) * (bnbPrice / tokenPriceUSD);
-      setTokensSold(prev => prev + tokensBought);
+      fetchTokensSold(); // تحديث مباشر بعد الشراء
     } catch {
       setStatus("❌ Transaction failed.");
       setTxHash(null);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const addTokenToWallet = async () => {
+    try {
+      const wasAdded = await window.ethereum.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: CONTRACT_ADDRESS,
+            symbol: "NIX",
+            decimals: 18,
+            image: "/logo.png",
+          },
+        },
+      });
+
+      if (wasAdded) {
+        setStatus("✅ Token added to wallet!");
+      } else {
+        setStatus("❌ Token not added.");
+      }
+    } catch (error) {
+      console.log(error);
+      setStatus("❌ Failed to add token.");
     }
   };
 
@@ -110,8 +156,12 @@ const App = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-black via-indigo-950 to-gray-900 text-white p-4">
       <div className="text-center mb-6">
         <h1 className="text-4xl font-bold text-cyan-400 mb-2">🚀 NIXEL Presale</h1>
-        <p className="text-sm text-gray-300">Stage {stageIndex + 1} · Price: {tokenPriceUSD}$ ≈ {(tokenPriceUSD / bnbPrice).toFixed(8)} BNB</p>
-        <a href="https://x.com/NIXEL_BSC" target="_blank" rel="noreferrer" className="inline-block mt-2 text-cyan-300 underline text-sm">🐦 Follow on X</a>
+        <p className="text-sm text-gray-300">
+          Stage {stageIndex + 1} · Price: {tokenPriceUSD}$ ≈ {(tokenPriceUSD / bnbPrice).toFixed(8)} BNB
+        </p>
+        <a href="https://x.com/NIXEL_BSC" target="_blank" rel="noreferrer" className="inline-block mt-2 text-cyan-300 underline text-sm">
+          🐦 Follow on X
+        </a>
       </div>
 
       <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl shadow-2xl p-6 max-w-md w-full">
@@ -124,7 +174,9 @@ const App = () => {
         </p>
 
         {walletAddress ? (
-          <p className="text-center text-sm text-green-400 mb-2">👜 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
+          <p className="text-center text-sm text-green-400 mb-2">
+            👜 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+          </p>
         ) : (
           <button onClick={connectWallet} className="w-full py-2 mb-3 bg-blue-600 rounded-md">🔗 Connect Wallet</button>
         )}
@@ -142,19 +194,25 @@ const App = () => {
           {isLoading ? "Processing..." : "🛒 Buy Now"}
         </button>
 
+        <button onClick={addTokenToWallet} className="mt-4 w-full py-2 bg-yellow-400 text-black font-semibold rounded-md hover:bg-yellow-300 transition">
+          ➕ Add NIXEL Token to Wallet
+        </button>
+
         {status && <p className="mt-3 text-center text-sm text-yellow-300">{status}</p>}
         {txHash && (
-          <a
-            className="block text-center mt-2 text-sm text-cyan-300 underline"
-            href={`https://bscscan.com/tx/${txHash}`}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a className="block text-center mt-2 text-sm text-cyan-300 underline" href={`https://bscscan.com/tx/${txHash}`} target="_blank" rel="noreferrer">
             🔍 View Transaction
           </a>
         )}
 
         <p className="mt-3 text-xs text-center text-gray-500">Tokens will be sent instantly to your wallet upon purchase.</p>
+      </div>
+
+      <div className="mt-10 text-center">
+        <p className="mb-2 text-sm text-gray-300">📱 Scan this QR to open on MetaMask Mobile</p>
+        <div className="inline-block p-2 bg-white rounded">
+          <QRCodeCanvas value="https://nixeltoken.github.io/nix-presale/" size={160} />
+        </div>
       </div>
 
       <footer className="mt-10 text-sm text-gray-500">© 2025 NIXEL. All rights reserved.</footer>
