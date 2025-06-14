@@ -14,46 +14,48 @@ const App = () => {
   const [correctNetwork, setCorrectNetwork] = useState(true);
   const [txHash, setTxHash] = useState(null);
   const [progressPercent, setProgressPercent] = useState(20);
+  const [showWalletOptions, setShowWalletOptions] = useState(false);
 
   const START_TIME = new Date("2025-06-10T00:00:00Z").getTime();
   const cycleDuration = 70 * 60 * 60;
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      fetch("https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd")
-        .then(res => res.json())
-        .then(data => setBnbPrice(data.binancecoin.usd))
-        .catch(() => setBnbPrice(null));
+    fetch("https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd")
+      .then(res => res.json())
+      .then(data => setBnbPrice(data.binancecoin.usd))
+      .catch(() => setBnbPrice(null));
 
-      checkNetwork();
+    checkNetwork();
 
-      if (window.ethereum) {
-        window.ethereum.on("chainChanged", () => window.location.reload());
-      }
-
-      const interval = setInterval(() => {
-        const now = Date.now();
-        const elapsedSeconds = (now - START_TIME) / 1000;
-        const timeInCycle = elapsedSeconds % cycleDuration;
-        const updatedProgress = 20 + (timeInCycle / cycleDuration) * (90 - 20);
-        setProgressPercent(updatedProgress);
-      }, 1000);
-
-      return () => clearInterval(interval);
+    if (window.ethereum) {
+      window.ethereum.on("chainChanged", () => window.location.reload());
     }
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsedSeconds = (now - START_TIME) / 1000;
+      const timeInCycle = elapsedSeconds % cycleDuration;
+      const updatedProgress = 20 + (timeInCycle / cycleDuration) * (90 - 20);
+      setProgressPercent(updatedProgress);
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const checkNetwork = async () => {
-    try {
-      const provider = new BrowserProvider(window.ethereum);
-      const network = await provider.getNetwork();
-      setCorrectNetwork(network.chainId === BigInt(56));
-    } catch (error) {
-      console.warn("checkNetwork error:", error);
-    }
+    const provider = new BrowserProvider(window.ethereum);
+    const network = await provider.getNetwork();
+    setCorrectNetwork(network.chainId === BigInt(56));
   };
 
   const connectWallet = async () => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile && !window.ethereum) {
+      setShowWalletOptions(true);
+      return;
+    }
+
     try {
       const web3Modal = new Web3Modal({
         cacheProvider: false,
@@ -191,6 +193,49 @@ const App = () => {
 
         <p className="mt-3 text-xs text-center text-gray-500">Tokens will be sent instantly to your wallet upon purchase.</p>
       </div>
+
+      {showWalletOptions && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="bg-white text-black rounded-xl p-6 max-w-sm w-full text-center">
+            <h2 className="text-xl font-bold mb-4">📱 Open in Wallet</h2>
+            <p className="text-sm text-gray-700 mb-4">Choose your wallet to open this site inside it:</p>
+
+            <a
+              href="https://metamask.app.link/dapp/nixeltoken.github.io/nix-presale/"
+              target="_blank"
+              rel="noreferrer"
+              className="block w-full py-2 mb-2 bg-orange-500 text-white rounded-md"
+            >
+              🦊 MetaMask
+            </a>
+
+            <a
+              href="https://link.trustwallet.com/open_url?coin_id=20000714&url=https://nixeltoken.github.io/nix-presale/"
+              target="_blank"
+              rel="noreferrer"
+              className="block w-full py-2 mb-2 bg-blue-600 text-white rounded-md"
+            >
+              🔐 Trust Wallet
+            </a>
+
+            <a
+              href="rabby://app?url=https://nixeltoken.github.io/nix-presale/"
+              target="_blank"
+              rel="noreferrer"
+              className="block w-full py-2 mb-4 bg-purple-600 text-white rounded-md"
+            >
+              🐰 Rabby Wallet
+            </a>
+
+            <button
+              onClick={() => setShowWalletOptions(false)}
+              className="text-sm text-gray-500 underline"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="mt-10 text-center">
         <p className="mb-2 text-sm text-gray-300">📱 Scan this QR to open on MetaMask Mobile</p>
