@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { Web3Provider } from "@ethersproject/providers";
 import { parseEther } from "ethers";
 import { QRCodeCanvas } from "qrcode.react";
 import Web3Modal from "web3modal";
@@ -45,7 +45,7 @@ const App = () => {
 
   const checkNetwork = async () => {
     if (!window.ethereum) return;
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new Web3Provider(window.ethereum);
     const network = await provider.getNetwork();
     setCorrectNetwork(network.chainId === 56);
   };
@@ -64,8 +64,8 @@ const App = () => {
         providerOptions: {},
       });
       const instance = await web3Modal.connect();
-      const provider = new ethers.BrowserProvider(instance);
-      const signer = await provider.getSigner();
+      const provider = new Web3Provider(instance);
+      const signer = provider.getSigner();
       const address = await signer.getAddress();
       setWalletAddress(address);
       checkNetwork();
@@ -87,8 +87,8 @@ const App = () => {
 
     try {
       setIsLoading(true);
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      const provider = new Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
       const tx = await signer.sendTransaction({
         to: CONTRACT_ADDRESS,
         value: parseEther(bnbAmount),
@@ -138,8 +138,20 @@ const App = () => {
     : "0";
 
   return (
-    <div>
-      {/* Main UI and controls here */}
+    <div className="bg-black min-h-screen text-white p-6 text-center">
+      <h1 className="text-3xl font-bold mb-4">🚀 NIXEL Presale is Live</h1>
+      <p className="text-gray-300 mb-6">Connect your wallet to participate in the presale.</p>
+
+      <button
+        onClick={connectWallet}
+        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg mb-4"
+      >
+        🔗 Connect Wallet
+      </button>
+
+      {walletAddress && (
+        <p className="text-green-400 mb-2">✅ Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
+      )}
 
       {showWalletOptions && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
