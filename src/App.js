@@ -14,6 +14,7 @@ const App = () => {
   const [correctNetwork, setCorrectNetwork] = React.useState(true);
   const [txHash, setTxHash] = React.useState(null);
   const [progressPercent, setProgressPercent] = React.useState(20);
+  const [showWalletOptions, setShowWalletOptions] = React.useState(false);
 
   const START_TIME = new Date("2025-06-10T00:00:00Z").getTime();
   const cycleDuration = 70 * 60 * 60;
@@ -48,19 +49,24 @@ const App = () => {
   };
 
   const connectWallet = async () => {
-    if (!window.ethereum) {
-      setStatus("❌ Please install MetaMask!");
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile && !window.ethereum) {
+      setShowWalletOptions(true);
       return;
     }
 
     try {
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const provider = new BrowserProvider(window.ethereum);
+      const web3Modal = new Web3Modal({
+        cacheProvider: false,
+        providerOptions: {},
+      });
+      const instance = await web3Modal.connect();
+      const provider = new BrowserProvider(instance);
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
       setWalletAddress(address);
       checkNetwork();
-      setStatus("✅ Wallet connected");
     } catch (err) {
       console.error("Connection failed", err);
       setStatus("❌ Wallet connection failed.");
@@ -149,7 +155,10 @@ const App = () => {
         {walletAddress ? (
           <p className="text-center text-sm text-green-400 mb-2">👜 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
         ) : (
-          <button onClick={connectWallet} className="w-full py-2 mb-2 bg-blue-600 rounded-md">🔗 Connect MetaMask Wallet</button>
+          <>
+            <button onClick={connectWallet} className="w-full py-2 mb-2 bg-blue-600 rounded-md">🔗 Connect Wallet</button>
+            <a href="https://metamask.app.link/dapp/nixeltoken.github.io/nix-presale/" target="_blank" rel="noreferrer" className="block text-center text-cyan-300 text-sm underline mb-3">📱 Open in MetaMask App</a>
+          </>
         )}
 
         <input
@@ -189,12 +198,52 @@ const App = () => {
         <div className="inline-block p-2 bg-white rounded">
           <QRCodeCanvas value="https://nixeltoken.github.io/nix-presale/" size={160} />
         </div>
-        <a href="https://metamask.app.link/dapp/nixeltoken.github.io/nix-presale/" target="_blank" rel="noreferrer" className="mt-4 inline-block text-cyan-300 underline text-sm">
-          📱 Open in MetaMask App
-        </a>
       </div>
 
       <footer className="mt-10 text-sm text-gray-500">© 2025 NIXEL. All rights reserved.</footer>
+
+      {showWalletOptions && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="bg-white text-black rounded-xl p-6 max-w-sm w-full text-center">
+            <h2 className="text-xl font-bold mb-4">📱 Open in Wallet</h2>
+            <p className="text-sm text-gray-700 mb-4">Choose your wallet to open this site inside it:</p>
+
+            <a
+              href="https://metamask.app.link/dapp/nixeltoken.github.io/nix-presale/"
+              target="_blank"
+              rel="noreferrer"
+              className="block w-full py-2 mb-2 bg-orange-500 text-white rounded-md"
+            >
+              🦊 MetaMask
+            </a>
+
+            <a
+              href="https://link.trustwallet.com/open_url?coin_id=20000714&url=https://nixeltoken.github.io/nix-presale/"
+              target="_blank"
+              rel="noreferrer"
+              className="block w-full py-2 mb-2 bg-blue-600 text-white rounded-md"
+            >
+              🔐 Trust Wallet
+            </a>
+
+            <a
+              href="rabby://app?url=https://nixeltoken.github.io/nix-presale/"
+              target="_blank"
+              rel="noreferrer"
+              className="block w-full py-2 mb-4 bg-purple-600 text-white rounded-md"
+            >
+              🐰 Rabby Wallet
+            </a>
+
+            <button
+              onClick={() => setShowWalletOptions(false)}
+              className="text-sm text-gray-500 underline"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
