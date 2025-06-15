@@ -1,15 +1,27 @@
 {
   "name": "nixel-presale",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
-  "homepage": "https://NIXELTOKEN.github.io/nix-presale",
+  "homepage": "https://nixeltoken.github.io/nix-presale",
   "dependencies": {
-    "ethers": "^6.8.1",
-    "qrcode.react": "^3.1.0",
+    "@craco/craco": "^7.1.0",
+    "@ethersproject/providers": "^5.8.0",
+    "@walletconnect/web3-provider": "^1.8.0",
+    "ethers": "^6.14.4",
+    "qrcode.react": "^4.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "react-tsparticles": "^2.12.2",
+    "tsparticles": "^3.8.1",
+    "util": "^0.12.5",
+    "web3modal": "^1.9.12"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.14",
+    "gh-pages": "^5.0.0",
+    "postcss": "^8.4.24",
+    "tailwindcss": "^3.3.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -18,9 +30,6 @@
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
-  },
-  "eslintConfig": {
-    "extends": ["react-app", "react-app/jest"]
   },
   "browserslist": {
     "production": [
@@ -33,8 +42,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "gh-pages": "^6.1.1"
   }
 }
