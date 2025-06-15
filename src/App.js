@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Web3Provider } from "@ethersproject/providers";
+import { ethers } from "ethers";
 import { parseEther } from "ethers";
 import { QRCodeCanvas } from "qrcode.react";
 import Web3Modal from "web3modal";
@@ -22,8 +22,8 @@ const App = () => {
 
   useEffect(() => {
     fetch("https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd")
-      .then((res) => res.json())
-      .then((data) => setBnbPrice(data.binancecoin.usd))
+      .then(res => res.json())
+      .then(data => setBnbPrice(data.binancecoin.usd))
       .catch(() => setBnbPrice(null));
 
     checkNetwork();
@@ -45,13 +45,9 @@ const App = () => {
 
   const checkNetwork = async () => {
     if (!window.ethereum) return;
-    try {
-      const provider = new Web3Provider(window.ethereum);
-      const network = await provider.getNetwork();
-      setCorrectNetwork(network.chainId === 56);
-    } catch (err) {
-      console.warn("Network check failed:", err);
-    }
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const network = await provider.getNetwork();
+    setCorrectNetwork(network.chainId === 56);
   };
 
   const connectWallet = async () => {
@@ -67,10 +63,9 @@ const App = () => {
         cacheProvider: false,
         providerOptions: {},
       });
-
       const instance = await web3Modal.connect();
-      const provider = new Web3Provider(instance);
-      const signer = provider.getSigner();
+      const provider = new ethers.BrowserProvider(instance);
+      const signer = await provider.getSigner();
       const address = await signer.getAddress();
       setWalletAddress(address);
       checkNetwork();
@@ -85,7 +80,6 @@ const App = () => {
       setStatus("⚠️ Enter BNB amount first.");
       return;
     }
-
     if (!correctNetwork) {
       setStatus("❗ Switch to Binance Smart Chain (BSC).");
       return;
@@ -93,8 +87,8 @@ const App = () => {
 
     try {
       setIsLoading(true);
-      const provider = new Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
       const tx = await signer.sendTransaction({
         to: CONTRACT_ADDRESS,
         value: parseEther(bnbAmount),
@@ -104,7 +98,7 @@ const App = () => {
       setTxHash(tx.hash);
       await tx.wait();
       setStatus("✅ Purchase successful! Tokens received instantly.");
-    } catch (err) {
+    } catch {
       setStatus("❌ Transaction failed.");
       setTxHash(null);
     } finally {
@@ -139,8 +133,9 @@ const App = () => {
 
   const equivalentUSD = bnbAmount && bnbPrice ? (bnbAmount * bnbPrice).toFixed(2) : "0.00";
   const tokenPriceUSD = 0.000095;
-  const estimatedTokens =
-    bnbAmount && bnbPrice ? Math.floor((bnbAmount * bnbPrice) / tokenPriceUSD).toLocaleString() : "0";
+  const estimatedTokens = bnbAmount && bnbPrice
+    ? Math.floor((bnbAmount * bnbPrice) / tokenPriceUSD).toLocaleString()
+    : "0";
 
   return (
     <div>
